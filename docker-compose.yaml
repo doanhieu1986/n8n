@@ -41,5 +41,4 @@ services:
 
 volumes:
   n8n_data:
-    external: true  # Sử dụng volume bạn đã tạo thủ công
   postgres_data:
