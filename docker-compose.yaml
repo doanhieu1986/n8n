@@ -16,7 +16,8 @@ services:
       retries: 10
 
   n8n:
-    image: docker.n8n.io/n8nio/n8n
+    # image: docker.n8n.io/n8nio/n8n
+    build: . # Thêm dòng này để build từ Dockerfile cùng thư mục
     container_name: n8n_app
     restart: always
     ports:
@@ -25,6 +26,8 @@ services:
       - GENERIC_TIMEZONE=Asia/Ho_Chi_Minh
       - TZ=Asia/Ho_Chi_Minh
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_BLOCK_SUDO=false          # Thêm để cho phép thực thi Python
+      - N8N_PYTHON_INTERPRETER=/usr/bin/python3 # Chỉ định đường dẫn Python
       - N8N_RUNNERS_ENABLED=true
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgres
