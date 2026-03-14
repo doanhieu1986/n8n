@@ -119,7 +119,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer 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"
+              "value": "=Bearer hf_"
             },
             {
               "name": "Accept",
