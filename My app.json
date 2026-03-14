@@ -1,0 +1,324 @@
+{
+  "name": "My app",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "238b2b7a-1a6a-459e-96fd-21d7eeba993f",
+              "name": "=topic",
+              "value": "Bí quyết ngủ ngon trong 5 phút",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        464
+      ],
+      "id": "dd720ec8-de71-4112-b3ab-5d1d96f4959b",
+      "name": "Set topic"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        464
+      ],
+      "id": "7c096004-8b11-4370-9727-6e0b0b3cec2a",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Bạn là chuyên gia biên kịch TikTok.\n\nDựa trên chủ đề: {{ $json.topic }}\n\nHãy tạo:\n\n1 Hook (3 giây đầu)\n3 phần nội dung\n1 Call to action\n\nSau đó chia thành 5 phân cảnh.\n\nOutput JSON format:\n\n{\n \"hook\": \"\",\n \"content\": [\n   \"\",\n   \"\",\n   \"\"\n ],\n \"cta\": \"\",\n \"scenes\":[\n   {\n    \"scene\":1,\n    \"image_prompt\":\"\",\n    \"narration\":\"\"\n   }\n ]\n}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        464
+      ],
+      "id": "50eafc51-fd26-496f-9c72-9f2f385273b0",
+      "name": "AI Script Generator"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"hook\": {\n      \"type\": \"string\"\n    },\n    \"content\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"cta\": {\n      \"type\": \"string\"\n    },\n    \"scenes\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"scene\": {\n            \"type\": \"number\"\n          },\n          \"image_prompt\": {\n            \"type\": \"string\"\n          },\n          \"narration\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        688
+      ],
+      "id": "df710b8b-7b99-46cc-88cc-e9c43cb85a0b",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        464,
+        688
+      ],
+      "id": "ccc91862-ddeb-4435-a9be-42a01ffc1279",
+      "name": "Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mf56oOw7839BEnoI",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "=output.scenes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        800,
+        464
+      ],
+      "id": "afaedcec-05b1-41b2-97b0-55aa07da8264",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        464
+      ],
+      "id": "31b2d3a6-cc47-4776-a007-78491b0db81a",
+      "name": "Wait",
+      "webhookId": "51d5ae41-c13d-49f3-bc82-22486c9adcdb"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer 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"
+            },
+            {
+              "name": "Accept",
+              "value": "image/png"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "inputs",
+              "value": "={{ $json.image_prompt }}"
+            },
+            {
+              "name": "width",
+              "value": "576"
+            },
+            {
+              "name": "height",
+              "value": "1024"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1248,
+        368
+      ],
+      "id": "8a204a45-42fc-4f8a-9501-12339f3d0255",
+      "name": "Generate images",
+      "notesInFlow": false,
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "from gtts import gTTS\nimport base64\nimport io\n\n# Lấy nội dung cần đọc từ node trước (biến narration)\ntext_to_read = _input.item.json.narration\n\n# Khởi tạo gTTS với ngôn ngữ tiếng Việt\ntts = gTTS(text=text_to_read, lang='vi')\n\n# Lưu âm thanh vào bộ nhớ đệm (Buffer)\nmp3_fp = io.BytesIO()\ntts.write_to_fp(mp3_fp)\nmp3_fp.seek(0)\n\n# Trả về dữ liệu dưới dạng Binary cho n8n\nreturn {\n    \"json\": _input.item.json,\n    \"binary\": {\n        \"data\": {\n            \"data\": base64.b64encode(mp3_fp.read()).decode('utf-8'),\n            \"fileName\": f\"voice_scene_{_input.item.json.scene}.mp3\",\n            \"fileExtension\": \"mp3\",\n            \"mimeType\": \"audio/mpeg\"\n        }\n    }\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        752
+      ],
+      "id": "ff72cb47-a7d4-4015-9afb-6b895ca56f06",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/FTYCiQT21H9XQvhRu0ch",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "sk_68357308fbf7e87f32ec0ff8da488b591751b2576a129526"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ $json.narration }}\",\n  \"model_id\": \"eleven_multilingual_v2\",\n  \"voice_settings\": {\n    \"stability\": 0.5,\n    \"similarity_boost\": 0.75\n  }\n}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 3000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1248,
+        560
+      ],
+      "id": "eadb8ed2-fe11-4346-b4f5-5cf853c441a5",
+      "name": "Generate Voice"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set topic": {
+      "main": [
+        [
+          {
+            "node": "AI Script Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Script Generator": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Script Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Script Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Generate images",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Voice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1de964d8-bd46-470d-830d-218361e99888",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3593997ae0ebe5f56692a957ceab0f91ff102f35505e9b50cb45630a42cdadde"
+  },
+  "id": "XoTBRlN7N0sRhfTS",
+  "tags": []
+}
