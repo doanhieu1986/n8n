@@ -1,5 +1,5 @@
 {
-  "name": "My app",
+  "name": "dataverse-demo-n8n",
   "nodes": [
     {
       "parameters": {
