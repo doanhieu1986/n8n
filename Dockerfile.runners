@@ -1,0 +1,25 @@
+# Stage 1: Get fonts from standard Alpine
+FROM alpine:3.22 AS deps
+
+RUN apk add --update --no-cache ttf-dejavu
+
+# Stage 2: Get static ffmpeg
+FROM mwader/static-ffmpeg:latest AS ffmpeg
+
+# Stage 3: Build final runners image
+FROM n8nio/runners:latest
+
+USER root
+
+# Install Python packages into n8n runner's venv
+RUN /usr/local/bin/uv pip install --python /opt/runners/task-runner-python/.venv/bin/python gTTS moviepy Pillow
+
+# Copy statically linked ffmpeg
+COPY --from=ffmpeg /ffmpeg /usr/bin/ffmpeg
+COPY --from=ffmpeg /ffprobe /usr/bin/ffprobe
+
+# Copy fonts for Pillow text rendering
+COPY --from=deps /usr/share/fonts /usr/share/fonts
+COPY --from=deps /etc/fonts /etc/fonts
+
+USER runner
