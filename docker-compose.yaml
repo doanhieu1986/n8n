@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h localhost -U ${DB_POSTGRESDB_USER} -d ${DB_POSTGRESDB_DATABASE}"]
+      test: [ "CMD-SHELL", "pg_isready -h localhost -U ${DB_POSTGRESDB_USER} -d ${DB_POSTGRESDB_DATABASE}" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -44,6 +44,7 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
       - ./n8n-task-runners.json:/etc/n8n-task-runners.json:ro
+      # - /Users/hieudt/Downloads/stock-broker-automation:/app
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,6 +64,7 @@ services:
       - N8N_RUNNERS_TASK_REQUEST_TIMEOUT=60
     volumes:
       - ./n8n-task-runners.json:/etc/n8n-task-runners.json:ro
+      # - /Users/hieudt/Downloads/stock-broker-automation:/app
     depends_on:
       - n8n
 
